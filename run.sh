@@ -1,0 +1,1 @@
+nohup python tweetResource.py 0<&- &> /tmp/twitter.log &
