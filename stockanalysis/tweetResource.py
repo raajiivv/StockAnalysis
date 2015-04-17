@@ -14,3 +14,5 @@ def getTopTweetsbySymbol(sym):
     topTweets = tweetRepository.getTopTweets(sym)
     return topTweets
 
+run(host = "0.0.0.0", port = 8800, interval = 1, reloader = True, debug = True)
+
