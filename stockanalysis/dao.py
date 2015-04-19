@@ -26,8 +26,8 @@ def delete_tweets(db):
 
 def store_sentiment(symbol, db, stock_value):
     sentiment = {}
-    tweets = db.tweets
-    mean_results_by_symbol = list(tweets.aggregate([{"$match" : { "symbol" : symbol }},{"$group" : {"_id": "$sentiment", "avgScore" : { "$avg" : "$score"}}}]))
+    db_tweets = db.tweets
+    mean_results_by_symbol = list(db_tweets.aggregate([{"$match" : { "symbol" : symbol }},{"$group" : {"_id": "$sentiment", "avgScore" : { "$avg" : "$score"}}}]))
     #print mean_results_by_symbol
     sentiment['symbol'] = symbol
     #sentiment['avg_pos_score'] = mean_results_by_symbol[1]['avgScore'] 
@@ -35,12 +35,15 @@ def store_sentiment(symbol, db, stock_value):
     sentiment['net_sentiment'] = mean_results_by_symbol[1]['avgScore'] + mean_results_by_symbol[2]['avgScore']
     sentiment['time'] = datetime.datetime.utcnow().strftime("%a %b %d %X +0000 %Y")
     sentiment['stock_value'] = stock_value
-    print sentiment
-    print
+    db.sentiments.remove({"symbol":symbol})
     db.sentiments.insert(sentiment)
 
-
-
-
-
+def store_top_tweets(symbol, db):
+    db_tweets = db.tweets
+    most_positive_tweet = db_tweets.find_one({"$and": [{"symbol": symbol},{"sentiment" : "positive"}]}, {"_id":0, "id":0, "score":0}, sort=[("score", -1)])
+    most_negative_tweet = db_tweets.find_one({"$and": [{"symbol": symbol},{"sentiment" : "negative"}]}, {"_id":0, "id":0, "score":0}, sort=[("score", 1)])
+    db.top_tweets.remove({"symbol":symbol})
+    db.top_tweets.insert(most_negative_tweet)
+    db.top_tweets.insert(most_positive_tweet)
+    
 

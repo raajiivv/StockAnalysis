@@ -259,6 +259,10 @@ def store_sentiment(symbol):
     dao.store_sentiment(symbol, db, stock_value)
     print datetime.datetime.now().time()
     return
+
+def store_top_tweets(symbol):
+    dao.store_top_tweets(symbol, db)
+    return
     
     
 # Establish credentials for Twitter, AlchemyAPI and MongoDB
