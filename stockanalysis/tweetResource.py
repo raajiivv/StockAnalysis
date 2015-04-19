@@ -3,10 +3,10 @@ Created on Apr 16, 2015
 
 @author: rajiv
 '''
-from bottle import run, route, response, hook
+from bottle import Bottle, run, route, response, hook
 import tweetRepository
 
-mySymbols = {"$AAPL"}
+myApp = Bottle()
 
 @hook('after_request')
 def enable_cors():
