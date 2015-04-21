@@ -242,15 +242,11 @@ def delete_tweets():
 def store_sentiment(symbol):
     stock_value = get_price(symbol.strip("$"))
     dao.store_sentiment(symbol, db, stock_value)
-    print datetime.datetime.now().time()
     return
 
 def store_top_tweets(symbol):
     dao.store_top_tweets(symbol, db)
     return
-
-
-
 
 def get_top_tweets(symbol):
     symbol = "$"+symbol.upper()
@@ -279,17 +275,36 @@ def get_sentiment_count(symbol):
     sentiment_count = {}
     total_count = count[0]+count[1]+count[2]
     sentiment_count['symbol'] = symbol
-    sentiment_count['positvie'] = ("%.2f" %(count[0]*100.0/total_count))
-    sentiment_count['negativie'] = ("%.2f" %(count[1]*100.0/total_count))
-    sentiment_count['neutral'] = ("%.2f" %(count[2]*100.0/total_count))
+    # calculates the percentage values if total count is greater than 0
+    sentiment_count['positvie'] =  ("%.2f" %(count[0]*100.0/total_count)) if total_count>0 else 0
+    sentiment_count['negativie'] = ("%.2f" %(count[1]*100.0/total_count)) if total_count>0 else 0
+    sentiment_count['neutral'] = ("%.2f" %(count[2]*100.0/total_count)) if total_count>0 else 0
     sentiment_percent = json.dumps(sentiment_count, ensure_ascii = False)
     #print sentiment_percent
     return sentiment_percent
     
-    
-    
-    
+def get_sentiment_change(symbol):
+    symbol = "$"+symbol.upper()
+    sentiment = dao.get_sentiment_change(symbol, db)
+    return json.dumps(sentiment, ensure_ascii=True)
 
+def get_sentiments():
+    all_sentiments = []
+    sentiments = dao.get_sentiment(db)
+    for sentiment in sentiments:
+        all_sentiments.append(sentiment)
+    return json.dumps(all_sentiments)
+
+def get_predicted_stock(symbol):
+    symbol = "$"+symbol.upper()
+    predicted_stock = {}
+    predicted_change = dao.get_predicted_stock_change(symbol, db)
+    # Calculate a predicted stock value based on the predicted change
+    predicted_value = float(predicted_change) + float(get_price(symbol.strip("$")))
+    predicted_stock['symbol'] = symbol
+    predicted_stock['predicted_change'] = predicted_change
+    predicted_stock['predicted_stock'] = predicted_value
+    return json.dumps(predicted_stock)
     
     
 # Establish credentials for Twitter, AlchemyAPI and MongoDB

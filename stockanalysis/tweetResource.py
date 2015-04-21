@@ -28,12 +28,33 @@ def getTopTweetsbySymbol(sym):
 @route('/getAllTweets/<sym>')
 def getAllTweetsbySymbol(sym):
     tweets = tr.get_all_tweets(sym)
+    response.content_type = 'application/json'
     return tweets
 
 @route('/getSentimentCount/<sym>')
 def getSentimentCountbySymbol(sym):
     count = tr.get_sentiment_count(sym)
+    response.content_type = 'application/json'
     return count
+
+@route('/getSentimentChange/<sym>')
+def getSentimentChangebySymbol(sym):
+    print True
+    sentiment = tr.get_sentiment_change(sym)
+    response.content_type = 'application/json'
+    return sentiment
+
+@route('/getSentiments')
+def getSentiments():
+    sentiments = tr.get_sentiments()
+    response.content_type = 'application/json'
+    return sentiments
+
+@route('/getPredictedStock/<sym>')
+def getPredictedStock(sym):
+    predicted_stock = tr.get_predicted_stock(sym)
+    response.content_type = 'application/json'
+    return predicted_stock
 
 run(host = "0.0.0.0", port = 8800, interval = 1, reloader = True, debug = True)
 
