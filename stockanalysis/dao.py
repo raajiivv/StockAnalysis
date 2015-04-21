@@ -32,10 +32,14 @@ def store_sentiment(symbol, db, stock_value):
     sentiment['symbol'] = symbol
     #sentiment['avg_pos_score'] = mean_results_by_symbol[1]['avgScore'] 
     #sentiment['avg_neg_score'] = mean_results_by_symbol[2]['avgScore']
-    sentiment['net_sentiment'] = mean_results_by_symbol[1]['avgScore'] + mean_results_by_symbol[2]['avgScore']
+    net_sentiment = 0
+    for n in mean_results_by_symbol:
+        net_sentiment = net_sentiment+n['avgScore']
+    sentiment['net_sentiment'] = net_sentiment
     sentiment['time'] = datetime.datetime.utcnow().strftime("%a %b %d %X +0000 %Y")
     sentiment['stock_value'] = stock_value
     db.sentiments.remove({"symbol":symbol})
+    print symbol, " : ", net_sentiment
     db.sentiments.insert(sentiment)
 
 def store_top_tweets(symbol, db):
@@ -45,5 +49,24 @@ def store_top_tweets(symbol, db):
     db.top_tweets.remove({"symbol":symbol})
     db.top_tweets.insert(most_negative_tweet)
     db.top_tweets.insert(most_positive_tweet)
+    
+def get_top_tweets(symbol,db):
+    db_top_tweets = db.top_tweets
+    tweets = db_top_tweets.find({"symbol": symbol}, {"_id":0 })
+    return tweets
+
+def get_tweets(symbol, db):
+    db_tweets = db.tweets
+    tweets = db_tweets.find({"symbol": symbol}, {"_id":0, "id":0, "score":0})
+    return tweets
+
+def get_sentiment_count(symbol, db):
+    db_tweets = db.tweets
+    count = []
+    count.append(db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "positive"}]}).count())
+    count.append(db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "negative"}]}).count())
+    count.append(db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "neutral"}]}).count())
+    return count
+    
     
 

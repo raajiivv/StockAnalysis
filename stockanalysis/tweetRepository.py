@@ -188,10 +188,6 @@ def get_text_sentiment(apikey, tweet, target, output):
 
     try:
         if 'OK' != response['status'] or 'docSentiment' not in response:
-            #print "Problem finding 'docSentiment' in HTTP response from AlchemyAPI"
-            #print response
-            #print "HTTP Status:", results.status_code, results.reason
-            #print "--"
             return
 
         tweet['sentiment'] = response['docSentiment']['type']
@@ -217,17 +213,6 @@ def dedup(tweets):
     print "After de-duplication, %d tweets" % len(collection)
     return collection
 
-
-def getTopTweets(sym):
-    topTweets = []
-    topPositive = {"symbol": "$AAPL", "timestamp": "Fri Apr 17 04:45:15 +0000 2015", "text": "$OSLH Has Become One Of The Most Powerful Penny Stocks This Week! Special Update: http://t.co/rQZs5De8kI $TRX $AAPL $GOOG", "screen_name":"StockDawgzz"}
-    topNegative = {"symbol": "$AAPL", "timestamp": "Fri Apr 17 02:39:53 +0000 2015", "text": "Analysts Harsh On SanDisks Q1 Suffering $AAPL $SNDK http://t.co/PFErzmdzen", "screen_name":"leegarcia121"}
-    topTweets.append(topPositive)
-    topTweets.append(topNegative)
-    topTweets = json.dumps(topTweets, ensure_ascii = False)
-    print topTweets
-    return topTweets
-
 def process_tweets(search_term, num_tweets):
     # Pull Tweets down from the Twitter API
     raw_tweets = search(search_term, num_tweets, auth)
@@ -251,7 +236,7 @@ def store_tweets():
 def delete_tweets():
     # Delete data from MongoDB
     dao.delete_tweets(db)
-    print datetime.datetime.now().time()
+    print "Deleted the tweets database at " , datetime.datetime.now().time()
     return
     
 def store_sentiment(symbol):
@@ -263,6 +248,48 @@ def store_sentiment(symbol):
 def store_top_tweets(symbol):
     dao.store_top_tweets(symbol, db)
     return
+
+
+
+
+def get_top_tweets(symbol):
+    symbol = "$"+symbol.upper()
+    top_tweets = []
+    db_cursor = dao.get_top_tweets(symbol, db)
+    for tweet in db_cursor:
+        top_tweets.append(tweet)
+    top_tweets = json.dumps(top_tweets, ensure_ascii = False)
+    #print top_tweets
+    return top_tweets
+
+def get_all_tweets(symbol):
+    symbol = "$"+symbol.upper()    
+    tweets = []
+    db_cursor = dao.get_tweets(symbol, db)
+    for tweet in db_cursor:
+        tweets.append(tweet)
+    tweets = json.dumps(tweets, ensure_ascii = False)
+    #print tweets
+    return tweets
+
+
+def get_sentiment_count(symbol):
+    symbol = "$"+symbol.upper()
+    count = dao.get_sentiment_count(symbol, db)
+    sentiment_count = {}
+    total_count = count[0]+count[1]+count[2]
+    sentiment_count['symbol'] = symbol
+    sentiment_count['positvie'] = ("%.2f" %(count[0]*100.0/total_count))
+    sentiment_count['negativie'] = ("%.2f" %(count[1]*100.0/total_count))
+    sentiment_count['neutral'] = ("%.2f" %(count[2]*100.0/total_count))
+    sentiment_percent = json.dumps(sentiment_count, ensure_ascii = False)
+    #print sentiment_percent
+    return sentiment_percent
+    
+    
+    
+    
+
     
     
 # Establish credentials for Twitter, AlchemyAPI and MongoDB

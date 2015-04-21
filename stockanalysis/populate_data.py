@@ -9,15 +9,15 @@ import tweetRepository as tr
 import datetime
 
 def populate():
-    #while True:
-    
-
-    
-        tr.delete_tweets()
+    while True:
+        '''
         for symbol in mySymbols:
             tr.process_tweets(symbol, 100)
+        tr.delete_tweets()
         tr.store_tweets()
         print datetime.datetime.now().time()
+        '''
+        
         
         for symbol in mySymbols:
             tr.store_sentiment(symbol)        
