@@ -248,6 +248,11 @@ def store_top_tweets(symbol):
     dao.store_top_tweets(symbol, db)
     return
 
+def get_symbols():
+    symbols = {"symbols": ["$AAPL", "$BAC", "$GE", "$CMCSA", "$MSFT", "$CSCO", "$F", "$INTC", "$T", "$PFE"]}
+    return json.dumps(symbols)
+    
+
 def get_top_tweets(symbol):
     symbol = "$"+symbol.upper()
     top_tweets = []

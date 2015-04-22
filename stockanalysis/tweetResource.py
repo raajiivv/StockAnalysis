@@ -19,6 +19,12 @@ def enable_cors():
     response.headers['Access-Control-Allow-Headers'] = 'Origin, Accept, Content-Type, X-Requested-With, X-CSRF-Token'
 
 
+@route('/getSymbols')
+def getSymbols():
+    symbols = tr.get_symbols()
+    response.content_type = 'application/json'
+    return symbols
+
 @route('/getTopTweets/<sym>')
 def getTopTweetsbySymbol(sym):
     topTweets = tr.get_top_tweets(sym)

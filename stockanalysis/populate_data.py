@@ -6,8 +6,7 @@ Created on Apr 19, 2015
 
 #from tweetRepository import delete_tweets, process_tweets, store_tweets,store_sentiment
 import tweetRepository as tr
-import datetime
-import time
+import datetime, time, requests
 
 def populate():
     h = datetime.datetime.utcnow().hour
@@ -31,6 +30,10 @@ def populate():
         for symbol in mySymbols:
             tr.store_sentiment(symbol)        
             tr.store_top_tweets(symbol)
+            
+results = requests.get(url="http://54.191.103.141:8800/getSymbols")
+response = results.json()
+mySymbols = response['symbols']
 
-mySymbols = {"$AAPL", "$BAC", "$GE", "$CMCSA", "$MSFT", "$CSCO", "$F", "$INTC", "$T", "$PFE"}
+#mySymbols = {"$AAPL", "$BAC", "$GE", "$CMCSA", "$MSFT", "$CSCO", "$F", "$INTC", "$T", "$PFE"}
 populate()
