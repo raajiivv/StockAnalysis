@@ -40,7 +40,7 @@ def populate():
             tr.store_sentiment(symbol)        
             tr.store_top_tweets(symbol)
             
-mySymbols = {}
+mySymbols = set()
 results = requests.get(url="http://54.191.103.141:8800/getSymbols")
 print results
 response = results.json()
