@@ -14,8 +14,7 @@ def populate():
         h = datetime.datetime.utcnow().hour
         w = datetime.datetime.today().weekday()
         d = int(datetime.date.today().strftime("%d"))
-        # Waits for 15 minutes before populating the data again
-        time.sleep(900)
+
         # Does not populate on weekends
         if w == 5 or w == 6:
             continue
@@ -28,7 +27,6 @@ def populate():
             
             print date, d
             date = d
-            
         
         for symbol in mySymbols:
             tr.process_tweets(symbol, 100)
@@ -39,6 +37,9 @@ def populate():
         for symbol in mySymbols:
             tr.store_sentiment(symbol)        
             tr.store_top_tweets(symbol)
+            
+        # Waits for 15 minutes before populating the data again
+        time.sleep(900)        
             
 mySymbols = set()
 results = requests.get(url="http://54.191.103.141:8800/getSymbols")
