@@ -40,9 +40,12 @@ def populate():
             tr.store_sentiment(symbol)        
             tr.store_top_tweets(symbol)
             
+mySymbols = {}
 results = requests.get(url="http://54.191.103.141:8800/getSymbols")
+print results
 response = results.json()
-mySymbols = response['symbols']
+for symbol in response:
+    mySymbols.add(symbol['symbol'])
 
 #mySymbols = {"$AAPL", "$BAC", "$GE", "$CMCSA", "$MSFT", "$CSCO", "$F", "$INTC", "$T", "$PFE"}
 populate()
