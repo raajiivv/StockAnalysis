@@ -22,6 +22,11 @@ def delete_tweets(db):
     #print "Data from twitter_db instance has been deleted!"
     return
 
+# Deletes the sentiment count
+def delete_sentiment_count(db):
+    db.sentiment_count.drop()
+    return
+
 # Stores sentiment and prediction values
 def store_sentiment(symbol, db, stock_value):
     sentiment = {}
@@ -29,6 +34,7 @@ def store_sentiment(symbol, db, stock_value):
     net_sentiment = 0
     sentiment_change = 0
     stock_change = 0
+    delta_ratio = 0
     db_tweets = db.tweets
     db_sentiments = db.sentiments
     db_prediction = db.prediction
@@ -77,16 +83,36 @@ def store_sentiment(symbol, db, stock_value):
     print symbol, " : ", net_sentiment
     db_sentiments.insert(sentiment)
     db_prediction.insert(prediction_values)
+    return
     
 # Stores top positive and negative tweets for easy access
 def store_top_tweets(symbol, db):
     db_tweets = db.tweets
-    most_positive_tweet = db_tweets.find_one({"$and": [{"symbol": symbol},{"sentiment" : "positive"}]}, {"_id":0, "id":0, "score":0}, sort=[("score", -1)])
-    most_negative_tweet = db_tweets.find_one({"$and": [{"symbol": symbol},{"sentiment" : "negative"}]}, {"_id":0, "id":0, "score":0}, sort=[("score", 1)])
-    if most_negative_tweet !=None and most_positive_tweet!=None:    
+    most_positive_tweets = db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "positive"}]}, {"_id":0, "id":0, "score":0}, sort=[("score", -1)], limit = 10)
+    most_negative_tweets = db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "negative"}]}, {"_id":0, "id":0, "score":0}, sort=[("score", 1)], limit = 10)
+    if most_negative_tweets !=None and most_positive_tweets!=None:    
         db.top_tweets.remove({"symbol":symbol})
-        db.top_tweets.insert(most_negative_tweet)
-        db.top_tweets.insert(most_positive_tweet)
+        db.top_tweets.insert(most_negative_tweets)
+        db.top_tweets.insert(most_positive_tweets)
+        return
+        
+# Stores the percentage counts of positive, negative and neutral sentiments
+def store_sentiment_count(symbol, db):
+    db_tweets = db.tweets
+    db_sentiment_count = db.sentiment_count
+    count = []
+    sentiment_count = {}
+    sentiment_count['symbol'] = symbol
+    sentiment_count['time'] = datetime.datetime.utcnow().strftime("%a %b %d %X +0000 %Y")
+    count.append(db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "positive"}]}).count())
+    count.append(db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "negative"}]}).count())
+    count.append(db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "neutral"}]}).count())
+    total_count = count[0]+count[1]+count[2]
+    sentiment_count['positvie'] =  ("%.2f" %(count[0]*100.0/total_count)) if total_count>0 else 0
+    sentiment_count['negativie'] = ("%.2f" %(count[1]*100.0/total_count)) if total_count>0 else 0
+    sentiment_count['neutral'] = ("%.2f" %(count[2]*100.0/total_count)) if total_count>0 else 0
+    db_sentiment_count.insert(sentiment_count)
+    return
 
 # Retrieves top positive and negative tweets    
 def get_top_tweets(symbol,db):
@@ -102,12 +128,15 @@ def get_tweets(symbol, db):
 
 # Gets the positive, negative and neutral sentiment count
 def get_sentiment_count(symbol, db):
-    db_tweets = db.tweets
-    count = []
-    count.append(db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "positive"}]}).count())
-    count.append(db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "negative"}]}).count())
-    count.append(db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "neutral"}]}).count())
+    db_sentiment_count = db.sentiment_count
+    count = db_sentiment_count.find_one({"symbol":symbol},{"_id":0},sort=[("$natural", -1)])
     return count
+
+# Gets the sentiment trend
+def get_sentiment_trend_today(symbol, db):
+    db_sentiment_count = db.sentiment_count
+    counts = db_sentiment_count.find({"symbol":symbol},{"_id":0})
+    return counts
 
 # Gets the change in sentiment
 def get_sentiment_change(symbol, db):
@@ -118,9 +147,15 @@ def get_sentiment_change(symbol, db):
     return sentiment
 
 # Returns the sentiments of all symbols
-def get_sentiment(db):
+def get_sentiments(db):
     db_sentiments = db.sentiments
     all_sentiments = db_sentiments.find({},{"_id":0})
+    return all_sentiments
+
+# Returns the sentiment
+def get_sentiment(symbol, db):
+    db_sentiments = db.sentiments
+    all_sentiments = db_sentiments.find_one({"symbol":symbol},{"_id":0})
     return all_sentiments
 
 # Return the predicted change in stock values

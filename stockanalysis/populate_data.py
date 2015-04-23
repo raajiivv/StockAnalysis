@@ -9,9 +9,11 @@ import tweetRepository as tr
 import datetime, time, requests
 
 def populate():
-    h = datetime.datetime.utcnow().hour
-    w = datetime.datetime.today().weekday()
+    date = 0
     while True:
+        h = datetime.datetime.utcnow().hour
+        w = datetime.datetime.today().weekday()
+        d = int(datetime.date.today().strftime("%d"))
         # Waits for 15 minutes before populating the data again
         time.sleep(900)
         # Does not populate on weekends
@@ -21,8 +23,15 @@ def populate():
         if h< 13 or h> 20:
             continue
         
+        if d!=date:
+            tr.delete_sentiment_count()
+            
+            print date, d
+            date = d
+            
+        
         for symbol in mySymbols:
-            tr.process_tweets(symbol, 50)
+            tr.process_tweets(symbol, 100)
         tr.delete_tweets()
         tr.store_tweets()
         print datetime.datetime.now().time()

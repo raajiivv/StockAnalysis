@@ -43,6 +43,18 @@ def getSentimentCountbySymbol(sym):
     response.content_type = 'application/json'
     return count
 
+@route('/getSentimentTrendToday/<sym>')
+def getSentimentTrendTodaybySymbol(sym):
+    counts = tr.get_sentiment_trend_today(sym)
+    response.content_type = 'application/json'
+    return counts
+
+@route('/getStockTrend/<sym>')
+def getStockTrendbySymbol(sym):
+    stock_trend = tr.get_stock_trend_by_week(sym)
+    response.content_type = 'application/json'
+    return stock_trend
+
 @route('/getSentimentChange/<sym>')
 def getSentimentChangebySymbol(sym):
     print True
@@ -51,8 +63,14 @@ def getSentimentChangebySymbol(sym):
     return sentiment
 
 @route('/getSentiments')
-def getSentiments():
-    sentiments = tr.get_sentiments()
+def getSentiments(sym):
+    sentiments = tr.get_sentiments(sym)
+    response.content_type = 'application/json'
+    return sentiments
+
+@route('/getSentiment/<sym>')
+def getSentiment(sym):
+    sentiments = tr.get_sentiment(sym)
     response.content_type = 'application/json'
     return sentiments
 

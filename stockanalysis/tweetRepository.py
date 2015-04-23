@@ -13,6 +13,7 @@ import pymongo
 import requests, json, urllib, base64
 
 import dao
+import ystockquote
 
 
 def get_credentials():
@@ -238,6 +239,12 @@ def delete_tweets():
     dao.delete_tweets(db)
     print "Deleted the tweets database at " , datetime.datetime.now().time()
     return
+
+def delete_sentiment_count():
+    # Delete data from MongoDB
+    dao.delete_sentiment_count(db)
+    print "Deleted the sentiment_count database at " , datetime.datetime.now().time()
+    return
     
 def store_sentiment(symbol):
     stock_value = get_price(symbol.strip("$"))
@@ -248,10 +255,18 @@ def store_top_tweets(symbol):
     dao.store_top_tweets(symbol, db)
     return
 
+def store_sentiment_count(symbol):
+    dao.store_sentiment_count(symbol, db)
+    return
+
 def get_symbols():
-    symbols = {"symbols": ["$AAPL", "$BAC", "$GE", "$CMCSA", "$MSFT", "$CSCO", "$F", "$INTC", "$T", "$PFE"]}
+    symbols = []
+    for sym in ["$AAPL", "$BAC", "$GE", "$MSFT", "$CSCO", "$INTC", "$T", "$GOOG", "$YHOO", "$TSLA"]:
+        symbol = {}
+        symbol['symbol'] = sym
+        symbol['name'] = ystockquote._request(sym.strip("$"), 'n').strip("\"")
+        symbols.append(symbol)
     return json.dumps(symbols)
-    
 
 def get_top_tweets(symbol):
     symbol = "$"+symbol.upper()
@@ -277,38 +292,56 @@ def get_all_tweets(symbol):
 def get_sentiment_count(symbol):
     symbol = "$"+symbol.upper()
     count = dao.get_sentiment_count(symbol, db)
-    sentiment_count = {}
-    total_count = count[0]+count[1]+count[2]
-    sentiment_count['symbol'] = symbol
-    # calculates the percentage values if total count is greater than 0
-    sentiment_count['positvie'] =  ("%.2f" %(count[0]*100.0/total_count)) if total_count>0 else 0
-    sentiment_count['negativie'] = ("%.2f" %(count[1]*100.0/total_count)) if total_count>0 else 0
-    sentiment_count['neutral'] = ("%.2f" %(count[2]*100.0/total_count)) if total_count>0 else 0
-    sentiment_percent = json.dumps(sentiment_count, ensure_ascii = False)
+    sentiment_percent = json.dumps(count, ensure_ascii = False)
     #print sentiment_percent
     return sentiment_percent
+
+def get_sentiment_trend_today(symbol):
+    symbol = "$"+symbol.upper()
+    counts = []
+    db_cursor = dao.get_sentiment_trend_today(symbol, db)
+    for count in db_cursor:
+        counts.append(count)
+    return json.dumps(counts, ensure_ascii = False)
+
+def get_stock_trend_by_week(symbol):
+    symbol = symbol.upper()
+    start_date = datetime.date.today()
+    end_date = start_date - datetime.timedelta(days = 1)
+    start_date = start_date - datetime.timedelta(days = 7)
+    start_date = str(start_date)
+    end_date = str(end_date)
+    return json.dumps(ystockquote.get_historical_prices(symbol, start_date, end_date))
+    
     
 def get_sentiment_change(symbol):
     symbol = "$"+symbol.upper()
     sentiment = dao.get_sentiment_change(symbol, db)
-    return json.dumps(sentiment, ensure_ascii=True)
+    return json.dumps(sentiment, ensure_ascii = False)
 
 def get_sentiments():
     all_sentiments = []
-    sentiments = dao.get_sentiment(db)
+    sentiments = dao.get_sentiments(db)
     for sentiment in sentiments:
         all_sentiments.append(sentiment)
     return json.dumps(all_sentiments)
+
+def get_sentiment(symbol):
+    symbol = "$"+symbol.upper()
+    sentiment = dao.get_sentiment(symbol, db)
+    return json.dumps(sentiment)
 
 def get_predicted_stock(symbol):
     symbol = "$"+symbol.upper()
     predicted_stock = {}
     predicted_change = dao.get_predicted_stock_change(symbol, db)
+    current_value = get_price(symbol.strip("$"))
     # Calculate a predicted stock value based on the predicted change
-    predicted_value = float(predicted_change) + float(get_price(symbol.strip("$")))
+    predicted_value = float(predicted_change) + float(current_value)
     predicted_stock['symbol'] = symbol
     predicted_stock['predicted_change'] = predicted_change
-    predicted_stock['predicted_stock'] = predicted_value
+    predicted_stock['predicted_value'] = predicted_value
+    predicted_stock['current_value'] = current_value
     return json.dumps(predicted_stock)
     
     
