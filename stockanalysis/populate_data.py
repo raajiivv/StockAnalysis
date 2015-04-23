@@ -36,6 +36,7 @@ def populate():
         
         for symbol in mySymbols:
             tr.store_sentiment(symbol)        
+            tr.store_sentiment_count(symbol)
             tr.store_top_tweets(symbol)
             
         # Waits for 15 minutes before populating the data again
