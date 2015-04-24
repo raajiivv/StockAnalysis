@@ -63,8 +63,8 @@ def getSentimentChangebySymbol(sym):
     return sentiment
 
 @route('/getSentiments')
-def getSentiments(sym):
-    sentiments = tr.get_sentiments(sym)
+def getSentiments():
+    sentiments = tr.get_sentiments()
     response.content_type = 'application/json'
     return sentiments
 

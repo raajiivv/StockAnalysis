@@ -31,6 +31,7 @@ def populate():
         for symbol in mySymbols:
             tr.process_tweets(symbol, 100)
         tr.delete_tweets()
+        tr.delete_tweets()
         tr.store_tweets()
         print datetime.datetime.now().time()
         

@@ -19,6 +19,7 @@ def store_tweets(tweets , db):
 # Deletes the tweets data
 def delete_tweets(db):
     db.tweets.drop()
+    db.tweets.drop()
     #print "Data from twitter_db instance has been deleted!"
     return
 

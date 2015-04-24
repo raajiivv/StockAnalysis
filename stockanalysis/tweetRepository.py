@@ -321,8 +321,10 @@ def get_sentiment_change(symbol):
 
 def get_sentiments():
     all_sentiments = []
-    sentiments = dao.get_sentiments(db)
-    for sentiment in sentiments:
+    symbols = json.loads(get_symbols())
+    for symbol in symbols:
+        sentiment = dao.get_sentiment(symbol['symbol'], db)
+        sentiment['name'] = symbol['name']
         all_sentiments.append(sentiment)
     return json.dumps(all_sentiments)
 
