@@ -235,6 +235,8 @@ def store_tweets():
     return    
     
 def delete_tweets():
+    # Clear enriched tweets array
+    enriched_tweets  = []
     # Delete data from MongoDB
     dao.delete_tweets(db)
     print "Deleted the tweets database at " , datetime.datetime.now().time()

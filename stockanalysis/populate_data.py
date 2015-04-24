@@ -9,7 +9,7 @@ import tweetRepository as tr
 import datetime, time, requests
 
 def populate():
-    date = 0
+    date = int(datetime.date.today().strftime("%d"))
     while True:
         h = datetime.datetime.utcnow().hour
         w = datetime.datetime.today().weekday()
@@ -30,7 +30,6 @@ def populate():
         
         for symbol in mySymbols:
             tr.process_tweets(symbol, 100)
-        tr.delete_tweets()
         tr.delete_tweets()
         tr.store_tweets()
         print datetime.datetime.now().time()
