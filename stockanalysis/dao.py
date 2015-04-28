@@ -117,7 +117,11 @@ def store_sentiment_count(symbol, db):
 # Retrieves top positive and negative tweets    
 def get_top_tweets(symbol,db):
     db_top_tweets = db.top_tweets
-    tweets = db_top_tweets.find({"symbol": symbol}, {"_id":0 })
+    if symbol == "$":
+        print "here"
+        tweets = db_top_tweets.find({}, {"_id":0 })
+    else:
+        tweets = db_top_tweets.find({"symbol": symbol}, {"_id":0 })
     return tweets
 
 # Retrieves all tweets

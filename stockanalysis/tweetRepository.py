@@ -4,7 +4,7 @@ Created on Apr 16, 2015
 @author: rajiv
 '''
 import datetime
-from multiprocessing import Pool, Lock, Queue, Manager
+from multiprocessing import Pool, Manager
 import sys
 from ystockquote import get_price
 
@@ -236,7 +236,6 @@ def store_tweets():
     
 def delete_tweets():
     # Clear enriched tweets array
-    global enriched_tweets
     enriched_tweets  = []
     # Delete data from MongoDB
     dao.delete_tweets(db)
@@ -271,7 +270,7 @@ def get_symbols():
         symbols.append(symbol)
     return json.dumps(symbols)
 
-def get_top_tweets(symbol):
+def get_top_tweets(symbol=""):
     symbol = "$"+symbol.upper()
     top_tweets = []
     db_cursor = dao.get_top_tweets(symbol, db)
