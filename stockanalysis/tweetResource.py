@@ -31,6 +31,12 @@ def getTopTweetsbySymbol(sym):
     response.content_type = 'application/json'
     return topTweets
 
+@route('/getTopTweets')
+def getAllTweets():
+    tweets = tr.get_top_tweets()
+    response.content_type = 'application/json'
+    return tweets
+
 @route('/getAllTweets/<sym>')
 def getAllTweetsbySymbol(sym):
     tweets = tr.get_all_tweets(sym)

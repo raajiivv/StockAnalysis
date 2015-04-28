@@ -4,7 +4,7 @@ Created on Apr 16, 2015
 @author: rajiv
 '''
 import datetime
-from multiprocessing import Pool, Lock, Queue, Manager
+from multiprocessing import Pool, Manager
 import sys
 from ystockquote import get_price
 
@@ -236,7 +236,6 @@ def store_tweets():
     
 def delete_tweets():
     # Clear enriched tweets array
-    global enriched_tweets
     enriched_tweets  = []
     # Delete data from MongoDB
     dao.delete_tweets(db)
@@ -271,7 +270,7 @@ def get_symbols():
         symbols.append(symbol)
     return json.dumps(symbols)
 
-def get_top_tweets(symbol):
+def get_top_tweets(symbol=""):
     symbol = "$"+symbol.upper()
     top_tweets = []
     db_cursor = dao.get_top_tweets(symbol, db)
@@ -309,12 +308,17 @@ def get_sentiment_trend_today(symbol):
 
 def get_stock_trend_by_week(symbol):
     symbol = symbol.upper()
+    stock_trend = []
     start_date = datetime.date.today()
     end_date = start_date - datetime.timedelta(days = 1)
     start_date = start_date - datetime.timedelta(days = 7)
-    start_date = str(start_date)
-    end_date = str(end_date)
-    return json.dumps(ystockquote.get_historical_prices(symbol, start_date, end_date))
+    rangeObject = ystockquote.get_historical_prices(symbol, str(start_date), str(end_date))
+    for single_date in (start_date + datetime.timedelta(n) for n in range(7)):
+        single_date = str(single_date)
+        if single_date in rangeObject :
+            rangeObject[single_date]['date'] = single_date
+            stock_trend.append(rangeObject[single_date])
+    return json.dumps(stock_trend)
     
 def get_sentiment_change(symbol):
     symbol = "$"+symbol.upper()
