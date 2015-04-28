@@ -21,7 +21,7 @@ def populate():
                 time.sleep(3600)
             continue
         # Does not populate after working hours
-        if h< 13 or h> 20:
+        if h< 13 or h> 21:
             continue
         
         populate_db(d, 100)
@@ -34,10 +34,9 @@ def populate_db(d, count):
         tr.delete_sentiment_count()
         print date, d, count
         date = d
-    
+    tr.delete_tweets()    
     for symbol in mySymbols:
         tr.process_tweets(symbol, count)
-    tr.delete_tweets()
     tr.store_tweets()
     print datetime.datetime.now().time()
     
