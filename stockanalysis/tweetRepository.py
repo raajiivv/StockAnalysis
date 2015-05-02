@@ -236,6 +236,7 @@ def store_tweets():
     
 def delete_tweets():
     # Clear enriched tweets array
+    global enriched_tweets
     enriched_tweets  = []
     # Delete data from MongoDB
     dao.delete_tweets(db)
