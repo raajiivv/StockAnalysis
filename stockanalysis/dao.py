@@ -60,6 +60,8 @@ def store_sentiment(symbol, db, stock_value):
     if prediction !=None :
         count_delta = prediction['count_delta']
         multiplication_factor = db_prediction.find_one({"symbol":symbol})['multiplication_factor'] 
+        if delta_ratio > (3*multiplication_factor):
+            delta_ratio = 3*multiplication_factor
         multiplication_factor = ((count_delta*multiplication_factor) + (delta_ratio))/(count_delta+1)
     else:
         count_delta = 0
@@ -90,7 +92,7 @@ def store_top_tweets(symbol, db):
     db_tweets = db.tweets
     most_positive_tweets = db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "positive"}]}, {"_id":0, "id":0, "score":0}, sort=[("score", -1)], limit = 10)
     most_negative_tweets = db_tweets.find({"$and": [{"symbol": symbol},{"sentiment" : "negative"}]}, {"_id":0, "id":0, "score":0}, sort=[("score", 1)], limit = 10)
-    if most_negative_tweets !=None and most_positive_tweets!=None:    
+    if most_negative_tweets.count() == 0 and most_positive_tweets.count() == 0 :    
         db.top_tweets.remove({"symbol":symbol})
         db.top_tweets.insert(most_negative_tweets)
         db.top_tweets.insert(most_positive_tweets)
